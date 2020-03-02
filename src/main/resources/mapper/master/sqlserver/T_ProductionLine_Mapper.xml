@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TProductionLineDao">	
+
+<select id="getProductionLineList"  parameterType="com.nssol.model.T_ProductionLine" resultType="com.nssol.model.T_ProductionLine">
+		SELECT
+		     id
+			,proLineCode
+			,proLineName
+			,isDel
+			
+		FROM 
+			T_ProductionLine
+		WHERE
+		    IsDel = 0
+	</select> 
+</mapper>

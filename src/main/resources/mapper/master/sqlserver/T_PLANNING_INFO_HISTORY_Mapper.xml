@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.MasterPlanningHistoryInfo">
+	<insert id="insertPlanningData" parameterType="java.util.List">
+        insert into T_PLANNING_INFO_HISTORY (OrderNo,DONo,SetCode,PlanQty,ShiptoPortCode,ShiptoPort,Warehouse,Brand,ProLine,SampleCode,ItemCode,QtyPcs
+        ,PlanningNum,ScanedQty,ScanedQty_Fail,ScanedQty_Subtract,ScanedQty_Add,IsScaned,Sort,IsDel,Creater,CreateTime
+        ,Modifyer,ModifyTime) values
+        (#{orderNo,jdbcType=VARCHAR}, 
+         #{dONo,jdbcType=VARCHAR},
+         #{setCode,jdbcType=VARCHAR},
+         #{qty,jdbcType=INTEGER},
+         #{shiptoPortCode,jdbcType=VARCHAR},
+         #{shiptoPort,jdbcType=VARCHAR},
+         #{warehouse,jdbcType=VARCHAR},
+         #{itemBrand,jdbcType=VARCHAR},
+         #{proLine,jdbcType=VARCHAR},
+         #{sampleCode,jdbcType=VARCHAR},
+         #{itemCode,jdbcType=VARCHAR},
+         #{qtyPcs,jdbcType=NUMERIC},
+         #{iD,jdbcType=VARCHAR},
+         0,
+         0,
+         0,
+         0,
+         0,
+         #{scanSort,jdbcType=VARCHAR},
+         0, 
+         'BatchUser',
+         getdate(),
+         'BatchUser',
+         getdate())
+    </insert>
+    
+    <select id="getPlanning" parameterType="com.nssol.model.PlanningData" resultType="com.nssol.model.T_Planning_Info">
+		SELECT
+			OrderNo orderNo,
+			DONo dONo,
+			SetCode setCode,
+			PlanQty planQty,
+			ShiptoPortCode shiptoPortCode,
+			ShiptoPort shiptoPort,
+			Warehouse warehouse,
+			Brand brand,
+			ProLine proLine,
+			SampleCode sampleCode,
+			ItemCode itemCode,
+			QtyPcs qtyPcs,
+			PlanningNum planningNum,
+			ScanedQty scanedQty,
+			ScanedQty_Fail scanedQty_Fail,
+			ScanedQty_Subtract scanedQty_Subtract,
+			ScanedQty_Add scanedQty_Subtract,
+			IsScaned isScaned,
+			Sort sort
+		FROM 
+			T_PLANNING_INFO_HISTORY
+		WHERE
+    		PlanningNum = #{iD}
+		    and IsDel = 0
+	</select>
+	
+	 <select id="getPlanningList"  resultType="com.nssol.model.T_Planning_Info">
+		SELECT
+			planningNum
+			,orderNo
+			,dONo
+			,setCode
+		FROM 
+			T_PLANNING_INFO_HISTORY
+		WHERE
+		   IsDel = 0
+		 AND 
+		   IsImportFlg=0
+	</select>
+    
+    <update id="upDatePlanningInfo" parameterType="com.nssol.model.T_Planning_Info">
+    	update T_PLANNING_INFO_HISTORY
+    	set PlanQty = #{qty,jdbcType=INTEGER},
+    		ShiptoPortCode = #{shiptoPortCode,jdbcType=VARCHAR},
+    		ShiptoPort = #{shiptoPort,jdbcType=VARCHAR},
+    		Warehouse = #{warehouse,jdbcType=VARCHAR},
+    		Brand = #{itemBrand,jdbcType=VARCHAR},
+    		ProLine = #{proLine,jdbcType=VARCHAR},
+    		SampleCode = #{sampleCode,jdbcType=VARCHAR},
+			ItemCode = #{itemCode,jdbcType=VARCHAR},
+    		QtyPcs = #{qtyPcs,jdbcType=NUMERIC},
+    		PlanningNum = #{iD,jdbcType=VARCHAR},
+    		ScanedQty = 0,
+    		ScanedQty_Fail = 0,
+    		ScanedQty_Subtract = 0,
+    		ScanedQty_Add = 0,
+    		IsScaned = 0,
+    		Sort = #{scanSort,jdbcType=INTEGER},
+            Modifyer = 'BatchUser',
+            ModifyTime = getdate()
+    	where PlanningNum = #{iD}
+		    and IsDel = 0
+    </update>
+    
+    <delete id="delPlanningInfo" parameterType="com.nssol.model.T_Planning_Info">
+        delete from T_PLANNING_INFO_HISTORY
+    	where PlanningNum = #{iD}
+		    and IsDel = 0
+    </delete>
+
+    <update id="delUpPlanningInfo" parameterType="com.nssol.model.PlanningData">
+    	update T_PLANNING_INFO_HISTORY
+    	set IsDel = 1
+    	where PlanningNum = #{iD}
+		    and IsDel = 0
+    </update>
+    
+     <update id="updatePlanningInfoImportFlg" parameterType="com.nssol.model.PlanningData">
+    	UPDATE T_PLANNING_INFO_HISTORY
+    	SET IsImportFlg = 1
+    	where PlanningNum = #{iD}
+		  and IsDel = 0
+    </update>
+</mapper>

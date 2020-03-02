@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TSetDetailDao">
+
+     <select id="getSetDetailList" parameterType="com.nssol.model.TSetDetail" resultType="com.nssol.model.TSetDetail">
+		SELECT
+			 orderNo
+			,dONo
+			,setCode
+			,colorCode
+			,colorCode+'-'+color color
+			,patternDimensionCode
+			,sizeCode
+			,sizeCode +'-'+size size
+			,(select top 1 A.SKUCode FROM T_ORDER_DETAIL A 
+			  WHERE A.OrderNo=T_SET_DETAIL.OrderNo
+			  AND A.IsDel=0
+			  AND A.ColorCode=T_SET_DETAIL.colorCode
+			  AND A.SizeCode =T_SET_DETAIL.SizeCode
+			  AND A.PatternDimensionCode =T_SET_DETAIL.PatternDimensionCode
+			  ORDER BY A.DetailNo DESC ) sKUCode
+			,qtyPerSet
+			,PickingUnit
+		FROM 
+			T_SET_DETAIL
+		WHERE
+		    IsDel = 0 
+		  AND
+		   DONo=#{dONo}
+		  AND
+		   setCode=#{setCode}
+		  AND
+		   orderNo=#{orderNo}
+	</select>
+</mapper>

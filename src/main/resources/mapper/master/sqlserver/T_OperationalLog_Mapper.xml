@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TOperationalLogDao">
+	<insert id="insertOperationalLog" parameterType="com.nssol.model.T_OperationalLog">
+        insert into T_OperationalLog
+         (DONo
+         ,PlanningNum
+         ,SetCode
+         ,OptTime
+         ,OptType
+         ,OptContent
+         ,OptError
+		,IsDel
+	    ,Creater
+	    ,CreateTime
+	    ,Modifyer
+	    ,ModifyTime) 
+	    VALUES
+	        (#{dONo}, 
+	         #{planningNum}, 
+	         #{setCode},
+	         #{optTime},
+	         #{optType},
+	         #{optContent},
+	         #{optError},
+	         0, 
+	         #{creater},
+	         getdate(),
+	         #{modifyer},
+	         getdate())
+    </insert>
+
+    <sql id="getWhereCondition">
+		<where>
+			 IsDel = 0 AND OptType!='0'
+			 <if test="planningNum != null and planningNum != ''">
+                 AND PlanningNum LIKE CONCAT('%',#{planningNum},'%')
+             </if>
+            <if test="dONo != null and dONo != ''">
+                 AND DONo LIKE CONCAT('%',#{dONo},'%')
+             </if>
+             <if test="setCode != null and setCode != ''">
+                 AND SetCode LIKE CONCAT('%',#{setCode},'%')
+             </if>
+		</where>
+	</sql>
+
+	 <select id="getLogListByPage" parameterType="com.nssol.model.T_OperationalLog" 
+     resultType="com.nssol.model.T_OperationalLog">
+       SELECT * FROM (
+		SELECT
+			   row_number() over(order by CreateTime DESC) RowID
+		      ,[PlanningNum]
+		      ,[DONo]
+		      ,[SetCode]
+		      ,Convert(varchar(50),[OptTime],121) OptTime
+		      ,[OptType]
+		      ,[OptContent]
+		      ,[IsDel]
+		      ,ISNULL((SELECT TOP 1 D.ProLineName FROM T_ProductionLine D WHERE D.IsDel=0 AND D.ProLineCode=T_OperationalLog.Creater),[Creater]) Creater
+		      ,[CreateTime]
+		FROM 
+			T_OperationalLog 
+			
+		  	<include refid="getWhereCondition"/>
+		 ) B
+		 WHERE B.RowID > #{startRecord} and  #{endRecord} >=B.RowID 
+     </select>
+	
+	<select id="selectTotLoglist" parameterType="com.nssol.model.T_OperationalLog"
+		resultType="com.nssol.model.T_OperationalLog">
+     
+		SELECT
+			   row_number() over(order by CreateTime DESC) RowID
+		      ,[PlanningNum]
+		      ,[DONo]
+		      ,[SetCode]
+		      ,[OptTime]
+		      ,[OptType]
+		      ,[OptContent]
+		      ,[IsDel]
+		      ,[Creater]
+		      ,[CreateTime]
+		FROM 
+			T_OperationalLog 
+		  	<include refid="getWhereCondition"/>
+		 ORDER BY CreateTime DESC 
+
+	</select>
+   
+</mapper>

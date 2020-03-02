@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.MasterPlanningHistoryInfo">
+	<insert id="insertPlanningDetail" parameterType="java.util.List">
+        insert into T_PLANNING_DETAIL_HISTORY (PlanningNum,OrderNo,DONo,SetCode,ColorCode,Color,PatternDimensionCode,SizeCode,Size,SKUCode,QtyPerSet,IsDel
+	    ,Creater,CreateTime,Modifyer,ModifyTime) values
+        <foreach collection="list" item="params" index="index" separator=",">
+	        (#{params.planningNum,jdbcType=VARCHAR}, 
+	         #{params.orderNo,jdbcType=VARCHAR}, 
+	         #{params.dONo,jdbcType=VARCHAR},
+	         #{params.setCode,jdbcType=VARCHAR},
+	         #{params.colorCode,jdbcType=VARCHAR},
+	         #{params.color,jdbcType=VARCHAR},
+	         #{params.patternDimensionCode,jdbcType=VARCHAR},
+	         #{params.sizeCode,jdbcType=VARCHAR},
+	         #{params.size,jdbcType=VARCHAR},
+	         #{params.sKUCode,jdbcType=VARCHAR},
+			 #{params.qtyPerSet,jdbcType=NUMERIC},
+	         0, 
+	         'BatchUser',
+	         getdate(),
+	         'BatchUser',
+	         getdate())
+	    </foreach>
+    </insert>
+    
+    <select id="getPlanningDetail" parameterType="com.nssol.model.T_Planning_Detail" resultType="com.nssol.model.T_Planning_Detail">
+		SELECT
+			PlanningNum planningNum,
+			OrderNo orderNo,
+			DONo dONo,
+			SetCode setCode,
+			ColorCode colorCode,
+			Color color,
+			PatternDimensionCode patternDimensionCode,
+			SizeCode sizeCode,
+			Size size,
+			SKUCode sKUCode,
+			QtyPerSet qtyPerSet
+		FROM 
+			T_PLANNING_DETAIL_HISTORY
+		WHERE
+			PlanningNum = #{planningNum}
+		    and IsDel = 0
+	</select>
+    
+    <delete id="delPlanningDetail" parameterType="com.nssol.model.T_Planning_Detail">
+    	delete from T_PLANNING_DETAIL_HISTORY
+    	where 
+    		PlanningNum = #{planningNum}
+		    and IsDel = 0
+    </delete>
+    
+    <delete id="delUpPlanningDetail" parameterType="com.nssol.model.T_Planning_Detail">
+    	update T_PLANNING_DETAIL_HISTORY
+    	set IsDel = 1
+    	where PlanningNum = #{planningNum}
+		    and IsDel = 0
+    </delete>
+</mapper>

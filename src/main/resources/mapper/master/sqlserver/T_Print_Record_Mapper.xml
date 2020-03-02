@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TPrintRecordDao">
+	<insert id="insertPrintRrcord" parameterType="com.nssol.model.T_Print_Record">
+        insert into T_Print_Record
+           (ID
+           ,PlanningNum
+			,DONo
+			,SetCode
+			,DispPackNum
+			,SeqNum
+			,ProLine
+			,NewFlg
+			,PrintNum
+			,RetReault
+			,IsDel
+			,Creater
+			,Modifyer) 
+	    VALUES
+	        (
+	        #{iD}
+			,#{planningNum}
+			,#{dONo}
+			,#{setCode}
+			,#{dispPackNum}
+			,#{seqNum}
+			,#{proLine}
+			,#{newFlg}
+			,#{printNum}
+			,#{retReault}
+	        ,0
+	        ,#{creater}
+	        ,#{modifyer})
+    </insert>
+    
+    <select  id="getPrintNum"  resultType="java.lang.Long">
+    SELECT  NEXT VALUE FOR [dbo].[S_Print]
+    </select>
+</mapper>

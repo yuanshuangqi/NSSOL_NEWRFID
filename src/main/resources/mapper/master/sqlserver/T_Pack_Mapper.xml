@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TPackDao">
+	<insert id="insertPackInfo" parameterType="com.nssol.model.T_Pack">
+        insert into T_Pack
+           (InnerPackNum
+           ,UQInnerPackNum
+           	,HandlingUnitID
+			,DispPackNum
+			,PlanningNum
+			,OrderNo
+			,DONo
+			,SetCode
+			,PackType
+			,QtyPerSet
+			,Factory
+			,WorkShop
+			,ProLine
+			,BrandModel
+			,IsDel
+			,Creater
+			,CreateTime
+			,Modifyer
+			,ModifyTime) 
+	    VALUES
+	        (
+	        NEXT VALUE FOR [dbo].[S_PACK]
+	        ,#{uQInnerPackNum}
+	        ,#{handlingUnitID}
+			,#{dispPackNum}
+			,#{planningNum}
+			,#{orderNo}
+			,#{dONo}
+			,#{setCode}
+			,#{packType}
+			,#{qtyPerSet}
+			,#{factory}
+			,#{workShop}
+			,#{proLine}
+			,#{brandModel}
+	        ,0
+	        ,#{creater}
+	        ,getdate()
+	        ,#{modifyer}
+	        ,getdate())
+    </insert>
+    
+    
+       <sql id="getWhereCondition">
+		<where>
+			 A.IsDel = 0
+            <if test="orderNo != null and orderNo != ''">
+                 AND A.orderNo LIKE CONCAT('%',#{orderNo},'%')
+             </if>
+             <if test="setCode != null and setCode != ''">
+                 AND A.SetCode LIKE CONCAT('%',#{setCode},'%')
+             </if>
+              <if test="dispPackNum != null and dispPackNum != ''">
+                 AND A.DispPackNum LIKE CONCAT('%',#{dispPackNum},'%')
+             </if>
+             <if test="proLine != null and proLine != ''">
+                 AND A.ProLine=#{proLine}
+             </if>
+              <if test="createTimeStart != null and createTimeStart != ''">
+                 AND CONVERT(varchar(12), A.CreateTime, 112) >= #{createTimeStart}
+             </if>
+                <if test="createTimeEnd != null and createTimeEnd != ''">
+                 AND  #{createTimeEnd} >= CONVERT(varchar(12), A.CreateTime, 112)
+             </if>
+              <if test="brandModel != null and brandModel != ''">
+                 AND A.brandModel=#{brandModel}
+             </if>
+		</where>
+	</sql>
+
+	 <select id="getPackListByPage" parameterType="com.nssol.model.T_Pack" 
+     resultType="com.nssol.model.T_Pack">
+       SELECT * FROM (
+		SELECT
+			   	row_number() over(order by A.CreateTime DESC) RowID
+		       	,A.InnerPackNum
+		       	,A.HandlingUnitID
+			   	,A.UQInnerPackNum
+				,A.DispPackNum
+				,A.PlanningNum
+				,A.OrderNo
+				,A.DONo
+				,A.SetCode
+				,C.ProLineName
+				,A.PackType
+				,A.QtyPerSet
+				,A.Factory
+				,A.WorkShop
+				,A.ProLine
+				,A.brandModel
+				,A.Comment
+				,A.IsDel
+				,ISNULL((SELECT TOP 1 D.ProLineName FROM T_ProductionLine D WHERE D.IsDel=0 AND D.ProLineCode=A.Creater),A.[Creater]) Creater
+				,convert(varchar(50),A.CreateTime,120) CreateTime
+		FROM 
+			T_Pack A
+		INNER JOIN
+		    T_ProductionLine C
+		  ON C.ProLineCode=A.ProLine
+		 
+		  	<include refid="getWhereCondition"/>
+		 ) B
+		 WHERE B.RowID > #{startRecord} and  #{endRecord} >=B.RowID 
+     </select>
+	
+	<select id="selectTotPacklist" parameterType="com.nssol.model.T_Pack"
+		resultType="com.nssol.model.T_Pack">
+     
+		SELECT
+			   	row_number() over(order by A.CreateTime DESC) RowID
+		       	,A.InnerPackNum
+			   	,A.UQInnerPackNum
+			   	,A.HandlingUnitID
+				,A.DispPackNum
+				,A.PlanningNum
+				,A.OrderNo
+				,A.DONo
+				,A.SetCode
+				,C.ProLineName
+				,A.PackType
+				,A.QtyPerSet
+				,A.Factory
+				,A.WorkShop
+				,A.ProLine
+				,A.brandModel
+				,A.Comment
+				,A.IsDel
+				,A.Creater
+				,convert(varchar(50),A.CreateTime,120) CreateTime
+		FROM 
+			T_Pack A
+		INNER JOIN
+		    T_ProductionLine C
+		  ON C.ProLineCode=A.ProLine 
+		  	<include refid="getWhereCondition"/>
+		 ORDER BY CreateTime DESC 
+
+	</select>
+   
+   <select id="deletePack" parameterType="map" statementType="CALLABLE">
+		{
+         call P_DeletePack(
+               #{deleter,mode=IN,jdbcType=VARCHAR},#{innerPackNum,mode=IN,jdbcType=VARCHAR},#{comment,mode=IN,jdbcType=VARCHAR},#{errorMsg,mode=OUT,jdbcType=VARCHAR})
+      	}
+	</select>
+
+			
+   <insert id="insertPackAndDetail" parameterType="com.nssol.model.T_Pack">
+       DECLARE @InnerPackNum VARCHAR(10),@NowTime DATETIME
+       SELECT  @InnerPackNum = NEXT VALUE FOR [dbo].[S_PACK]
+       SET @NowTime = GETDATE()
+       
+        insert into T_Pack
+           (InnerPackNum
+           ,UQInnerPackNum
+           ,HandlingUnitID
+			,DispPackNum
+			,PlanningNum
+			,OrderNo
+			,DONo
+			,SetCode
+			,PackType
+			,QtyPerSet
+			,Factory
+			,WorkShop
+			,ProLine
+			,BrandModel
+			,IsDel
+			,Creater
+			,CreateTime
+			,Modifyer
+			,ModifyTime) 
+	    VALUES
+	        (
+	         @InnerPackNum
+	        ,#{uQInnerPackNum}
+	        ,#{handlingUnitID}
+			,#{dispPackNum}
+			,#{planningNum}
+			,#{orderNo}
+			,#{dONo}
+			,#{setCode}
+			,#{packType}
+			,#{qtyPerSet}
+			,#{factory}
+			,#{workShop}
+			,#{proLine}
+			,#{brandModel}
+	        ,0
+	        ,#{creater}
+	        ,@NowTime
+	        ,#{modifyer}
+	        ,@NowTime)
+	        
+	        insert into T_Pack_Detail
+	         ( 	InnerPackNum,
+        		DispPackNum,
+		        OrderNo,
+		        DONo,
+		        SetCode,
+		        RFID,
+		        SKUCode,
+		        IsDel,
+		        Creater,
+		        CreateTime,
+		        Modifyer,
+		        ModifyTime) values
+        <foreach collection="packDetailList" item="T_Pack_Detail" index="index"
+                 separator=",">
+             ( @InnerPackNum,
+              #{T_Pack_Detail.dispPackNum,jdbcType=VARCHAR},
+              #{T_Pack_Detail.orderNo,jdbcType=VARCHAR},
+              #{T_Pack_Detail.dONo,jdbcType=VARCHAR},
+              #{T_Pack_Detail.setCode,jdbcType=VARCHAR},
+              #{T_Pack_Detail.rFID,jdbcType=VARCHAR},
+              #{T_Pack_Detail.sKUCode,jdbcType=VARCHAR},
+              0,
+              #{T_Pack_Detail.creater,jdbcType=VARCHAR},
+              @NowTime,
+              #{T_Pack_Detail.modifyer,jdbcType=VARCHAR},
+              @NowTime)
+            </foreach> 
+    </insert>
+    
+    <select id="getPackIsExistByHandlingUnitID" parameterType="com.nssol.model.T_Pack" 
+     resultType="com.nssol.model.T_Pack">
+		SELECT
+		     TOP 1
+		     A.handlingUnitID
+		FROM 
+			T_Pack A
+		WHERE A.handlingUnitID=#{handlingUnitID}
+     </select>
+</mapper>

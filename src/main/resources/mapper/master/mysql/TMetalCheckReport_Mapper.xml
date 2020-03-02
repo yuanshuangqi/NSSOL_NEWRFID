@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.ReportDao">
+    <delete id="delete">
+        delete from t_metalcheck_report
+        where ScanTime >= #{arg0} and #{arg1} >= ScanTime;
+    </delete>
+	<insert id="insert">
+        INSERT INTO t_metalcheck_report (OrderNo,DetailNo,SKUCode,ColorCode,Color,SizeCode,Size,PatternDimensionCode,SampleCode,ItemCode,Item, MetalcheckAddress, ScanTime,Sensitivity,ScanNum)
+        SELECT x.OrderNo,x.DetailNo,x.SKUCode,y.ColorCode,y.Color,y.SizeCode,y.Size,y.PatternDimensionCode,y.SampleCode,y.ItemCode,y.Item, z.DicValue MetalcheckAddress,DATE_FORMAT(x.CreateTime,'%Y-%m-%d') ScanTime,x.Sensitivity ,count(x.Sensitivity)
+        FROM v_metalcheck_detail x
+        LEFT JOIN t_order_detail y
+        ON x.OrderNo = y.OrderNo AND x.DetailNo = y.DetailNo
+        INNER JOIN t_mst_dictionary z
+        ON x.BaggingAddress = z.ID
+        WHERE x.CreateTime>= #{arg0} AND #{arg1} >= x.CreateTime
+        GROUP BY x.BaggingAddress,x.Sensitivity,x.OrderNo,x.DetailNo,DATE_FORMAT(x.CreateTime,'%Y-%m-%d')
+    </insert>
+</mapper>

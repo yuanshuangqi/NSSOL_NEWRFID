@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.MasterPlanningInfo">
+	<insert id="insertPlanningDetail" parameterType="com.nssol.model.PlanningData">
+        insert into T_PLANNING_DETAIL (PlanningNum,OrderNo,DONo,SetCode,ColorCode,Color,
+        PatternDimensionCode,SizeCode,Size,SKUCode,QtyPerSet,IsDel
+	    ,Creater,CreateTime,Modifyer,ModifyTime) 
+	    	SELECT 
+			   A.PlanningNum
+			   ,A.OrderNo
+			   ,A.DONo
+			   ,A.SetCode
+			   ,T.ColorCode
+			   ,T.Color
+			   ,T.PatternDimensionCode
+			   ,T.SizeCode
+			   ,T.Size
+			   ,(SELECT TOP 1 D.SKUCode  FROM T_ORDER_DETAIL D 
+			    WHERE D.IsDel=0 
+				AND D.OrderNo=A.OrderNo 
+				AND D.ColorCode=T.ColorCode
+				AND D.SizeCode=T.SizeCode
+				AND D.PatternDimensionCode=T.PatternDimensionCode
+			   ORDER BY DetailNo DESC)
+			   ,t.QtyPerSet
+			   ,0
+			   ,A.Creater
+			   ,A.CreateTime
+			   ,A.Modifyer
+			   ,A.ModifyTime
+			FROM
+			    T_PLANNING_INFO_HISTORY A
+			INNER JOIN 
+			    T_SET_DETAIL T
+			ON   T.DONo=A.DONo 
+			AND  T.SetCode=A.SetCode 
+			AND  T.IsDel=0
+			WHERE 
+            	A.PlanningNum = #{iD}
+        	AND A.IsDel=0
+    </insert>
+    
+    <select id="getPlanningDetail" parameterType="com.nssol.model.T_Planning_Detail" resultType="com.nssol.model.T_Planning_Detail">
+		SELECT
+			PlanningNum planningNum,
+			OrderNo orderNo,
+			DONo dONo,
+			SetCode setCode,
+			ColorCode colorCode,
+			Color color,
+			PatternDimensionCode patternDimensionCode,
+			SizeCode sizeCode,
+			Size size,
+			SKUCode sKUCode,
+			QtyPerSet qtyPerSet
+		FROM 
+			T_PLANNING_DETAIL
+		WHERE
+			PlanningNum = #{planningNum}
+		    and IsDel = 0
+	</select>
+    
+    <delete id="delPlanningDetail" parameterType="com.nssol.model.T_Planning_Detail">
+    	delete from T_PLANNING_DETAIL
+    	where 
+    		PlanningNum = #{planningNum}
+		    and IsDel = 0
+    </delete>
+    
+    <delete id="delUpPlanningDetail" parameterType="com.nssol.model.T_Planning_Detail">
+    	update T_PLANNING_DETAIL
+    	set IsDel = 1
+    	where PlanningNum = #{planningNum}
+		    and IsDel = 0
+    </delete>
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TPackNumBindDao">
+ 
+	  <sql id="getWhereCondition">
+		<where>
+			 A.IsDel = 0 
+            <if test="handlingUnitID != null and handlingUnitID != ''">
+                 AND A.handlingUnitID =#{handlingUnitID}
+             </if>
+
+		</where>
+	</sql>
+	
+
+	
+	 <select id="getPackNumByHandlingUnitID" parameterType="com.nssol.model.T_PackNum_Bind" 
+     resultType="com.nssol.model.T_PackNum_Bind">
+		SELECT
+		     TOP 1
+		     A.handlingUnitID
+			,A.dispPackNum
+			,A.qty
+			,A.orderNo
+			,A.boxNo
+			,A.styleNo
+			,'0' AS isUserd
+		FROM 
+			T_PackNum_Bind A
+		  	<include refid="getWhereCondition"/>
+     </select>
+</mapper>

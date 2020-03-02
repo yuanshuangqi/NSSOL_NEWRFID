@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TMstDictionaryDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.TMstDictionary">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="dicType" jdbcType="VARCHAR" property="dicType" />
+		<result column="dicID" jdbcType="VARCHAR" property="dicId" />
+		<result column="dicValue" jdbcType="VARCHAR" property="dicValue" />
+	</resultMap>
+	
+	<sql id="getLatelyPo">
+		<where>
+			1=1
+			 <if test="dicType != null and dicType != ''">
+                 AND DicType =#{dicType}
+             </if>
+             
+		</where>
+	</sql>
+	
+	<select id="selectByskuCode" parameterType="com.nssol.model.TMstDictionary"
+		resultMap="BaseResultMap">
+		select 
+		    ID,
+			DicType,
+			DicID,
+			DicValue
+			FROM 
+			T_MST_DICTIONARY
+	<include refid="getLatelyPo"/>
+	 order by ID,DicType
+	</select>
+</mapper>

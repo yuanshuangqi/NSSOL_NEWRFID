@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TPrintDetailRecordDao">
+	<insert id="insertPrintDetailRecord" parameterType="java.util.List">
+        insert into T_PRINT_DETAIL_RECORD ( PrintID
+							      ,PrintContent
+							      ,PrintModel
+							      ,IsDel
+							      ,Creater
+							      ,Modifyer) values
+        <foreach collection="list" item="params" index="index"
+                 separator=",">
+             (#{params.printID,jdbcType=VARCHAR},
+              #{params.printContent,jdbcType=VARCHAR},
+              #{params.printModel,jdbcType=VARCHAR},
+              0,
+              #{params.creater,jdbcType=VARCHAR},
+              #{params.modifyer,jdbcType=VARCHAR})
+            </foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TSetInfoDao">
+ 
+	  <sql id="getWhereCondition">
+		<where>
+			 A.IsDel = 0  AND (C.ItemBrand !='UNIQLO' AND  C.ItemBrand !='GU') 
+            <if test="dONo != null and dONo != ''">
+                 AND A.DONo LIKE CONCAT('%',#{dONo},'%')
+             </if>
+             <if test="setCode != null and setCode != ''">
+                 AND A.SetCode LIKE CONCAT('%',#{setCode},'%')
+             </if>
+             
+              <if test="orderNo != null and orderNo != ''">
+                 AND A.OrderNo LIKE CONCAT('%',#{orderNo},'%')
+             </if>
+               
+		</where>
+	</sql>
+	
+	 <select id="getPackingCartonByPage" parameterType="com.nssol.model.TSetInfo" 
+     resultType="com.nssol.model.TSetInfo">
+       SELECT * FROM (
+		SELECT
+			row_number() over(order by A.ImportTime DESC) RowID
+		    ,A.orderNo
+			,A.dONo
+			,A.setCode
+			,A.Quantity
+			,B.shiptoPortCode
+			,B.shiptoPort
+			,B.warehouse
+			,ISNULL((SELECT COUNT(D.InnerPackNum) 
+					FROM T_PACK D 
+					WHERE A.OrderNo =D.OrderNo
+					AND   A.DONo=D.DONo
+					AND   A.SetCode=D.SetCode ),0) ScanedQty
+		FROM 
+			T_SET_INFO A
+		INNER JOIN 
+		    T_DO_INFO B
+		 ON A.DONo =B.DONo AND B.IsDel=0
+		INNER JOIN 
+		    T_PO_INFO C
+		  ON A.OrderNo=C.OrderNo
+		  AND C.IsDel=0
+		  	<include refid="getWhereCondition"/>
+		 ) B
+		 WHERE B.RowID > #{startRecord} and  #{endRecord} >=B.RowID 
+     </select>
+	
+	<select id="selectTotPackingCartonlist" parameterType="com.nssol.model.TSetInfo"
+		resultType="com.nssol.model.TSetInfo">
+     
+		SELECT
+			row_number() over(order by A.ImportTime DESC) RowID
+		    ,A.orderNo
+			,A.dONo
+			,A.setCode
+			,A.Quantity
+			,B.shiptoPortCode
+			,B.shiptoPort
+			,B.warehouse
+			
+		FROM 
+			T_SET_INFO A
+		INNER JOIN 
+		    T_DO_INFO B
+		 ON A.DONo =B.DONo AND B.IsDel=0
+		INNER JOIN 
+		    T_PO_INFO C
+		  ON A.OrderNo=C.OrderNo
+		  AND C.IsDel=0
+		  	<include refid="getWhereCondition"/>
+	</select>
+	
+	 <select id="getSetInfoBysetCode" parameterType="com.nssol.model.TSetInfo" 
+     resultType="com.nssol.model.TSetInfo">
+		SELECT
+		     TOP 1
+		     A.orderNo
+			,A.dONo
+			,A.setCode
+			,A.Quantity
+			,B.shiptoPortCode
+			,B.shiptoPort
+			,B.warehouse
+			,ISNULL((SELECT COUNT(D.InnerPackNum) 
+					FROM T_PACK D 
+					WHERE A.OrderNo =D.OrderNo
+					AND   A.DONo=D.DONo
+					AND   A.SetCode=D.SetCode ),0) ScanedQty
+		FROM 
+			T_SET_INFO A
+		INNER JOIN 
+		    T_DO_INFO B
+		 ON A.DONo =B.DONo AND B.IsDel=0
+		INNER JOIN 
+		    T_PO_INFO C
+		  ON A.OrderNo=C.OrderNo
+		  AND C.IsDel=0
+		  	<include refid="getWhereCondition"/>
+		  	ORDER BY A.ImportTime DESC
+     </select>
+</mapper>
